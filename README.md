@@ -22,6 +22,15 @@ A free, passive OSINT-derived external attack-surface monitor.
 > **This is the open-source project, and it ships with demo data only** — `config/companies.yaml` uses fake `.example` domains.
 >
 > **Do not run the scheduled workflows against real companies from a public repo (including a public fork).** They persist the findings lake to a branch, and on a public repository that branch — and any workflow artifacts — are **world-readable**. To monitor real assets, run your own instance from a **private** repo, or switch the lake to private storage (see [`deploy/README.md`](deploy/README.md)). Publishing the *code* is fine; publishing a *lake of real findings about real companies* is not.
+>
+> _The scheduled `daily`/`weekly` workflows are **disabled** in this repo (manual `workflow_dispatch` only)._
+
+> [!NOTE]
+> **Desktop app (v0.4.0).** This repo also ships a local, single-user **desktop build** — a native window ([pywebview](https://pywebview.flowrl.com/)) over the tool, backed by SQLite, with a UI to manage API keys (stored in the OS keychain), edit the watchlist and settings, trigger runs, and triage findings. First run walks a short setup wizard.
+>
+> - **Architecture & build plan:** [`PLAN.md`](PLAN.md)
+> - **Build it:** [`packaging/`](packaging/) — `packaging/build_macos.sh` (→ `dist/securitysight.app`) or `packaging/build_windows.ps1` (→ `dist/securitysight/securitysight.exe`); full steps, the WebView2 note, and the unsigned-bundle bypass in [`packaging/README.md`](packaging/README.md).
+> - **Run from source:** `python main.py` (desktop window) · `python dashboard.py` (browser at `localhost:8000`) · `python collectors.py` (headless CLI).
 
 ---
 

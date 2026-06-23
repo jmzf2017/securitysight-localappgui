@@ -1,14 +1,12 @@
-# Daily collectors. Cron is UTC; 07:00 UTC here. GitHub may delay scheduled
-# runs under load, so don't treat the time as exact. Trigger manually any time
-# WARNING: on a PUBLIC repo this commits a world-readable findings lake. Run real
-# monitoring from a private repo or use private lake storage (see deploy/README.md).
-# from the Actions tab ("Run workflow"), optionally as a dry run.
+# Daily collectors — MANUAL ONLY here (scheduled cron is disabled).
+# WARNING: on a PUBLIC repo a run commits a world-readable findings lake. Run
+# real monitoring from a PRIVATE repo or use private lake storage (deploy/README.md).
+# Re-enable automatic runs (private repo only) by adding back a `schedule:` trigger.
+# Trigger manually from the Actions tab ("Run workflow"), optionally as a dry run.
 
 name: Daily risk monitor
 
 on:
-  schedule:
-    - cron: "0 7 * * *"
   workflow_dispatch:
     inputs:
       dry_run:

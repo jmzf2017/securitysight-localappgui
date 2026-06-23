@@ -1,14 +1,12 @@
-# Weekly collectors (credit-metered sources like Leak-Lookup). Mondays 08:00
-# UTC. Shares the same lake branch as the daily run, so findings correlate
-# across both. Cron is UTC and may be delayed under load.
-# WARNING: on a PUBLIC repo this commits a world-readable findings lake. Run real
-# monitoring from a private repo or use private lake storage (see deploy/README.md).
+# Weekly collectors (credit-metered sources like Leak-Lookup) — MANUAL ONLY here
+# (scheduled cron is disabled). Shares the same lake branch as the daily run.
+# WARNING: on a PUBLIC repo a run commits a world-readable findings lake. Run
+# real monitoring from a PRIVATE repo or use private lake storage (deploy/README.md).
+# Re-enable automatic runs (private repo only) by adding back a `schedule:` trigger.
 
 name: Weekly risk monitor
 
 on:
-  schedule:
-    - cron: "0 8 * * 1"
   workflow_dispatch:
     inputs:
       dry_run:
