@@ -1,0 +1,12 @@
+data/
+.env
+.git/
+.gitignore
+__pycache__/
+**/__pycache__/
+*.pyc
+.venv/
+.uv/
+deploy/
+*.tar.gz
+README.md

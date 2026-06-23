@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 548" width="920" height="548" role="img" aria-label="Triage dashboard preview">
+<rect x="0" y="0" width="920" height="548" rx="14" fill="#0e1217" stroke="#28323d" stroke-width="1" />
+<text x="32" y="42" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#8696a7" letter-spacing="2.4">PORTFOLIO RISK MONITOR</text>
+<text x="32" y="72" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="30" font-weight="600" fill="#e8eef4">Triage</text>
+<text x="118" y="71" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="400" fill="#5b6b7b">— what to actually worry about today</text>
+<text x="888" y="42" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#8696a7" text-anchor="end">as of today</text>
+<text x="888" y="60" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" font-weight="400" fill="#7ee787" text-anchor="end">13 findings in lake</text>
+<rect x="32" y="92" width="132" height="54" rx="10" fill="#161c24" stroke="#28323d" stroke-width="1" />
+<rect x="32" y="92" width="3" height="54" rx="0" fill="#ff4d6d" />
+<text x="48" y="122" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="24" font-weight="600" fill="#ff4d6d">6</text>
+<text x="48" y="137" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#8696a7" letter-spacing="0.5">Critical · open</text>
+<rect x="176" y="92" width="132" height="54" rx="10" fill="#161c24" stroke="#28323d" stroke-width="1" />
+<rect x="176" y="92" width="3" height="54" rx="0" fill="#ff9442" />
+<text x="192" y="122" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="24" font-weight="600" fill="#ff9442">3</text>
+<text x="192" y="137" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#8696a7" letter-spacing="0.5">High · open</text>
+<rect x="320" y="92" width="132" height="54" rx="10" fill="#161c24" stroke="#28323d" stroke-width="1" />
+<rect x="320" y="92" width="3" height="54" rx="0" fill="#f0c64a" />
+<text x="336" y="122" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="24" font-weight="600" fill="#f0c64a">1</text>
+<text x="336" y="137" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#8696a7" letter-spacing="0.5">Medium · open</text>
+<rect x="464" y="92" width="132" height="54" rx="10" fill="#161c24" stroke="#28323d" stroke-width="1" />
+<rect x="464" y="92" width="3" height="54" rx="0" fill="#7ee787" />
+<text x="480" y="122" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="24" font-weight="600" fill="#7ee787">4</text>
+<text x="480" y="137" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#8696a7" letter-spacing="0.5">Triaged</text>
+<rect x="32" y="164" width="856" height="34" rx="9" fill="#161c24" stroke="#28323d" stroke-width="1" />
+<text x="46" y="186" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#5b6b7b">🔍  Search company, host, CVE…</text>
+<rect x="440" y="171" width="84" height="20" rx="10" fill="#1c242e" stroke="#ff4d6d" stroke-width="1" />
+<text x="482" y="185" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="500" fill="#ff4d6d" text-anchor="middle">critical</text>
+<rect x="532" y="171" width="84" height="20" rx="10" fill="#1c242e" stroke="#ff9442" stroke-width="1" />
+<text x="574" y="185" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="500" fill="#ff9442" text-anchor="middle">high</text>
+<rect x="624" y="171" width="84" height="20" rx="10" fill="#1c242e" stroke="#f0c64a" stroke-width="1" />
+<text x="666" y="185" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="500" fill="#f0c64a" text-anchor="middle">medium</text>
+<rect x="716" y="171" width="84" height="20" rx="10" fill="#1c242e" stroke="#46b3a6" stroke-width="1" />
+<text x="758" y="185" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="500" fill="#46b3a6" text-anchor="middle">low</text>
+<rect x="32" y="210" width="856" height="74" rx="10" fill="#161c24" stroke="#28323d" stroke-width="1" />
+<rect x="32" y="210" width="6" height="74" rx="0" fill="#ff4d6d" />
+<text x="78" y="244" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="21" font-weight="600" fill="#ff4d6d" text-anchor="middle">100</text>
+<text x="78" y="260" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9" font-weight="400" fill="#8696a7" text-anchor="middle" letter-spacing="0.6">critical</text>
+<rect x="120" y="224" width="1" height="46" rx="0" fill="#28323d" />
+<text x="140" y="234" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="600" fill="#e8eef4">Meridian Health</text>
+<rect x="264.0" y="223" width="88.0" height="17" rx="5" fill="#15301f" />
+<text x="272.0" y="235" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="11" font-weight="400" fill="#7ee787">RansomLook</text>
+<text x="364.0" y="235" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#7ee787">· new today</text>
+<text x="140" y="255" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="400" fill="#e8eef4">Listed on LockBit leak site</text>
+<rect x="140" y="264" width="237.6" height="17" rx="6" fill="#1c242e" stroke="#ff9442" stroke-width="1" opacity="0.9"/>
+<text x="149" y="276" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#ff9442">company is on a ransomware leak site</text>
+<rect x="32" y="294" width="856" height="74" rx="10" fill="#161c24" stroke="#28323d" stroke-width="1" />
+<rect x="32" y="294" width="6" height="74" rx="0" fill="#ff4d6d" />
+<text x="78" y="328" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="21" font-weight="600" fill="#ff4d6d" text-anchor="middle">100</text>
+<text x="78" y="344" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9" font-weight="400" fill="#8696a7" text-anchor="middle" letter-spacing="0.6">critical</text>
+<rect x="120" y="308" width="1" height="46" rx="0" fill="#28323d" />
+<text x="140" y="318" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="600" fill="#e8eef4">Meridian Health</text>
+<rect x="264.0" y="307" width="59.2" height="17" rx="5" fill="#15301f" />
+<text x="272.0" y="319" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="11" font-weight="400" fill="#7ee787">Shodan</text>
+<text x="335.2" y="319" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#7ee787">· new today</text>
+<text x="140" y="339" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="400" fill="#e8eef4">203.0.113.10:3389  (RDP exposed)</text>
+<rect x="140" y="348" width="298.59999999999997" height="17" rx="6" fill="#1c242e" stroke="#ff9442" stroke-width="1" opacity="0.9"/>
+<text x="149" y="360" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#ff9442">exposed service runs ransomware-linked KEV CVE</text>
+<rect x="446.59999999999997" y="348" width="176.6" height="17" rx="6" fill="#1c242e" stroke="#28323d" stroke-width="1" opacity="0.9"/>
+<text x="455.59999999999997" y="360" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#8696a7">crown-jewel weighting x1.5</text>
+<rect x="32" y="378" width="856" height="74" rx="10" fill="#161c24" stroke="#28323d" stroke-width="1" />
+<rect x="32" y="378" width="6" height="74" rx="0" fill="#ff4d6d" />
+<text x="78" y="412" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="21" font-weight="600" fill="#ff4d6d" text-anchor="middle">100</text>
+<text x="78" y="428" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9" font-weight="400" fill="#8696a7" text-anchor="middle" letter-spacing="0.6">critical</text>
+<rect x="120" y="392" width="1" height="46" rx="0" fill="#28323d" />
+<text x="140" y="402" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="600" fill="#e8eef4">Atlas Fintech</text>
+<rect x="248.8" y="391" width="88.0" height="17" rx="5" fill="#15301f" />
+<text x="256.8" y="403" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="11" font-weight="400" fill="#7ee787">VirusTotal</text>
+<text x="348.8" y="403" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#7ee787">· new today</text>
+<text x="140" y="423" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="400" fill="#e8eef4">6 engines flag atlasfintech.example as malicious</text>
+<rect x="140" y="432" width="323.0" height="17" rx="6" fill="#1c242e" stroke="#ff9442" stroke-width="1" opacity="0.9"/>
+<text x="149" y="444" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#ff9442">flagged-malicious domain also has exposed services</text>
+<rect x="32" y="462" width="856" height="74" rx="10" fill="#161c24" stroke="#28323d" stroke-width="1" />
+<rect x="32" y="462" width="6" height="74" rx="0" fill="#ff9442" />
+<text x="78" y="496" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="21" font-weight="600" fill="#ff9442" text-anchor="middle">84</text>
+<text x="78" y="512" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9" font-weight="400" fill="#8696a7" text-anchor="middle" letter-spacing="0.6">high</text>
+<rect x="120" y="476" width="1" height="46" rx="0" fill="#28323d" />
+<text x="140" y="486" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="600" fill="#e8eef4">Atlas Fintech</text>
+<rect x="248.8" y="475" width="59.2" height="17" rx="5" fill="#15301f" />
+<text x="256.8" y="487" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="11" font-weight="400" fill="#7ee787">Shodan</text>
+<text x="320.0" y="487" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#7ee787">· new today</text>
+<text x="140" y="507" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="400" fill="#e8eef4">192.0.2.20:5432  (Postgres exposed)</text>
+<rect x="140" y="516" width="133.89999999999998" height="17" rx="6" fill="#1c242e" stroke="#28323d" stroke-width="1" opacity="0.9"/>
+<text x="149" y="528" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#8696a7">new in the last 24h</text>
+<rect x="281.9" y="516" width="176.6" height="17" rx="6" fill="#1c242e" stroke="#28323d" stroke-width="1" opacity="0.9"/>
+<text x="290.9" y="528" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#8696a7">crown-jewel weighting x1.2</text>
+</svg>

@@ -1,0 +1,28 @@
+[Unit]
+Description=Portfolio risk monitor - collection run
+Documentation=https://github.com/jmzf2017/securitysight
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=pcrm
+Group=pcrm
+WorkingDirectory=/opt/portco-risk-monitor
+# Keys & SLACK_WEBHOOK_URL live here (KEY=VALUE lines, no `export`, no quotes needed)
+EnvironmentFile=/opt/portco-risk-monitor/.env
+
+# Recommended: run via uv (must be on PATH for the service user).
+ExecStart=/usr/bin/env uv run collectors.py
+# --- or, if you installed into a virtualenv instead of using uv: ---
+# ExecStart=/opt/portco-risk-monitor/.venv/bin/python collectors.py
+
+# Hardening: the only thing this needs to write is the data lake.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/portco-risk-monitor/data
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true

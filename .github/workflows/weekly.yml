@@ -1,0 +1,25 @@
+# Weekly collectors (credit-metered sources like Leak-Lookup). Mondays 08:00
+# UTC. Shares the same lake branch as the daily run, so findings correlate
+# across both. Cron is UTC and may be delayed under load.
+# WARNING: on a PUBLIC repo this commits a world-readable findings lake. Run real
+# monitoring from a private repo or use private lake storage (see deploy/README.md).
+
+name: Weekly risk monitor
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Print the Slack payload instead of posting"
+        type: boolean
+        default: false
+
+jobs:
+  collect:
+    uses: ./.github/workflows/risk-monitor.yml
+    secrets: inherit
+    with:
+      cadence: weekly
+      dry_run: ${{ inputs.dry_run == true }}

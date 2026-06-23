@@ -1,0 +1,20 @@
+# the data lake is local and append-only; don't commit it
+data/
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+.uv/
+
+# local script config & reset backups
+.ssp.env
+data.bak.*
+
+# private handoff doc — names the target org; never publish
+context.md
+
+# desktop-app build artifacts (PyInstaller)
+build/
+dist/
+*.app

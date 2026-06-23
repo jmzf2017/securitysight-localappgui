@@ -1,0 +1,37 @@
+# Two services sharing one data volume:
+#   dashboard  - always-on triage UI on :8000
+#   collector  - runs a collection pass now, then every 24h (PCRM_INTERVAL_SECONDS)
+#
+#   docker compose up -d --build          start both
+#   docker compose run --rm collector collect   one-off run on demand
+#   docker compose run --rm collector seed      load demo data
+#   docker compose logs -f collector      watch runs
+#
+# Put your keys in .env (see .env.example). For wall-clock-aligned daily runs,
+# prefer a host cron / k8s CronJob calling `collect` over the built-in loop.
+
+services:
+  dashboard:
+    build: .
+    command: ["dashboard"]
+    ports:
+      - "8000:8000"
+    env_file: [.env]
+    volumes:
+      - pcrm-data:/app/data
+      - ./config:/app/config:ro
+    restart: unless-stopped
+
+  collector:
+    build: .
+    command: ["loop"]
+    env_file: [.env]
+    environment:
+      PCRM_INTERVAL_SECONDS: "86400"
+    volumes:
+      - pcrm-data:/app/data
+      - ./config:/app/config:ro
+    restart: unless-stopped
+
+volumes:
+  pcrm-data:

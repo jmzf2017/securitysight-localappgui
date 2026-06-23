@@ -1,0 +1,37 @@
+# The watchlist. Each entry is something you're authorized to monitor:
+# a portfolio company, a vendor under contract, or your own org.
+#
+# These are DEMO entries using fake `.example` domains. Only replace them with
+# real companies in a PRIVATE instance — if the scheduled workflows run in a
+# public repo, the resulting findings lake is world-readable. See README.
+#
+#   domains      : roots collectors pivot on (crt.sh, Shodan, Censys, breaches)
+#   cidrs        : optional owned IP ranges (future: reverse lookups)
+#   aliases      : extra name strings for keyword sources (ransomware feeds)
+#   tags         : product/vendor inventory — drives KEV & vuln-intel matching
+#   criticality  : 1.0 normal; >1 floats a crown-jewel company's findings up
+
+companies:
+  - name: Northwind Logistics
+    domains: [northwind-logistics.example]
+    aliases: ["Northwind", "Northwind Freight"]
+    tags: [fortinet, vmware, exchange]
+    criticality: 1.3
+
+  - name: Meridian Health
+    domains: [meridianhealth.example]
+    aliases: ["Meridian", "Meridian Health Systems"]
+    tags: [citrix, "windows server"]
+    criticality: 1.5          # regulated data, weight findings up
+
+  - name: Atlas Fintech
+    domains: [atlasfintech.example]
+    aliases: ["Atlas", "Atlas Pay"]
+    tags: [nginx, postgres, kubernetes]
+    criticality: 1.2
+
+  - name: Cedar Manufacturing
+    domains: [cedarmfg.example]
+    aliases: ["Cedar", "Cedar Mfg"]
+    tags: [scada, "moveit transfer"]
+    criticality: 1.0

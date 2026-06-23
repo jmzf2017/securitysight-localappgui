@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>securitysight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e1217; --panel:#161c24; --panel-2:#1c242e; --hover:#212c38;
+    --border:#28323d; --ink:#e8eef4; --muted:#8696a7; --faint:#5b6b7b;
+    --accent:#6ea8fe; --phosphor:#7ee787;
+    --crit:#ff4d6d; --high:#ff9442; --med:#f0c64a; --low:#46b3a6; --info:#6b7b8c;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif; font-size:14px; line-height:1.5;}
+  code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 80px}
+
+  header{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:6px}
+  .brand{font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  h1{font-size:34px;font-weight:600;margin:2px 0 4px;letter-spacing:-.01em}
+  .pitch{color:var(--faint);font-size:13px;max-width:52ch}
+  .asof{color:var(--muted);font-size:12px;text-align:right}
+  .asof .mono{color:var(--phosphor)}
+
+  /* ---- nav ---- */
+  .nav{display:flex;gap:6px;margin:20px 0 18px;flex-wrap:wrap}
+  .nav button{cursor:pointer;border:1px solid var(--border);background:var(--panel);
+    color:var(--muted);border-radius:8px;padding:8px 14px;font:inherit;font-size:13px;font-weight:500}
+  .nav button:hover{color:var(--ink)}
+  .nav button.active{color:var(--ink);border-color:var(--accent);
+    background:color-mix(in srgb,var(--accent) 14%,transparent)}
+  .view{display:none} .view.active{display:block}
+
+  /* ---- stat tiles ---- */
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px}
+  .tile{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:12px 16px;min-width:108px;position:relative;overflow:hidden}
+  .tile .n{font-size:26px;font-weight:600;line-height:1;font-family:"IBM Plex Mono"}
+  .tile .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:6px}
+  .tile.crit{box-shadow:inset 3px 0 0 var(--crit)} .tile.crit .n{color:var(--crit)}
+  .tile.high{box-shadow:inset 3px 0 0 var(--high)} .tile.high .n{color:var(--high)}
+  .tile.med{box-shadow:inset 3px 0 0 var(--med)}  .tile.med .n{color:var(--med)}
+  .tile.done{box-shadow:inset 3px 0 0 var(--phosphor)} .tile.done .n{color:var(--phosphor)}
+
+  /* ---- toolbar ---- */
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:12px;
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px}
+  .toolbar input[type=search],.toolbar select{background:var(--panel-2);border:1px solid var(--border);
+    color:var(--ink);border-radius:8px;padding:7px 10px;font:inherit;font-size:13px}
+  .toolbar input[type=search]{flex:1;min-width:160px}
+  .sevpills{display:flex;gap:6px}
+  .pill{cursor:pointer;border:1px solid var(--border);background:var(--panel-2);color:var(--muted);
+    border-radius:999px;padding:5px 11px;font-size:12px;font-weight:500;user-select:none}
+  .pill[data-on="1"]{color:var(--ink);border-color:var(--ink)}
+  .pill.crit[data-on="1"]{background:color-mix(in srgb,var(--crit) 22%,transparent);border-color:var(--crit);color:var(--crit)}
+  .pill.high[data-on="1"]{background:color-mix(in srgb,var(--high) 22%,transparent);border-color:var(--high);color:var(--high)}
+  .pill.med[data-on="1"]{background:color-mix(in srgb,var(--med) 22%,transparent);border-color:var(--med);color:var(--med)}
+  .pill.low[data-on="1"]{background:color-mix(in srgb,var(--low) 22%,transparent);border-color:var(--low);color:var(--low)}
+  .pill.info[data-on="1"]{background:color-mix(in srgb,var(--info) 28%,transparent);border-color:var(--info);color:var(--ink)}
+
+  /* ---- queue ---- */
+  .queue{display:flex;flex-direction:column;gap:10px}
+  .card{display:grid;grid-template-columns:6px 64px 1fr auto;gap:0;background:var(--panel);
+    border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:background .12s}
+  .card:hover{background:var(--hover)}
+  .card[data-status="acknowledged"],.card[data-status="dismissed"]{opacity:.5}
+  .spine{width:6px}
+  .crit .spine{background:var(--crit)} .high .spine{background:var(--high)}
+  .med .spine{background:var(--med)}   .low .spine{background:var(--low)} .info .spine{background:var(--info)}
+  .score{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 0;border-right:1px solid var(--border)}
+  .score b{font-family:"IBM Plex Mono";font-size:22px;font-weight:600;line-height:1}
+  .score span{font-size:9.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-top:4px}
+  .crit .score b{color:var(--crit)} .high .score b{color:var(--high)}
+  .med .score b{color:var(--med)}   .low .score b{color:var(--low)} .info .score b{color:var(--info)}
+  .body{padding:12px 14px;min-width:0}
+  .line1{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:3px}
+  .co{font-weight:600}
+  .src{font-family:"IBM Plex Mono";font-size:11px;color:var(--phosphor);
+    background:color-mix(in srgb,var(--phosphor) 12%,transparent);padding:1px 7px;border-radius:5px}
+  .age{font-size:11px;color:var(--faint)} .age.new{color:var(--phosphor)}
+  .title{font-family:"IBM Plex Mono";font-size:13px;color:var(--ink);word-break:break-word}
+  .why{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .where{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .where code{font-family:"IBM Plex Mono";font-size:12px;color:var(--phosphor);
+    background:color-mix(in srgb,var(--phosphor) 10%,transparent);
+    border:1px solid color-mix(in srgb,var(--phosphor) 22%,var(--border));padding:1px 7px;border-radius:5px}
+  .assets{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .assets .asset{display:inline-flex;gap:6px;align-items:center;font-size:11px;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:6px;padding:2px 7px}
+  .assets .asset.exposed{border-color:color-mix(in srgb,var(--high) 50%,var(--border))}
+  .assets .asset code{font-family:"IBM Plex Mono";font-size:11.5px;color:var(--ink)}
+  .assets .asset em{font-style:normal;color:var(--faint);font-size:10px}
+  .assets.none{font-size:11.5px;color:var(--muted);background:var(--panel-2);
+    border:1px dashed var(--border);border-radius:6px;padding:5px 9px;display:block}
+  .assets.none code{font-family:"IBM Plex Mono";color:var(--ink)}
+  .wlabel{font-size:9.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--faint);margin-right:2px}
+  .chip{font-size:11px;color:var(--muted);background:var(--panel-2);border:1px solid var(--border);border-radius:6px;padding:2px 8px}
+  .chip.boost{color:var(--high);border-color:color-mix(in srgb,var(--high) 40%,var(--border))}
+  .detail{margin-top:10px;display:none}
+  .detail pre{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:11.5px;color:var(--muted);overflow:auto;margin:0}
+  .actions{display:flex;flex-direction:column;gap:6px;padding:12px 12px;border-left:1px solid var(--border);justify-content:center}
+  .btn{cursor:pointer;border:1px solid var(--border);background:var(--panel-2);color:var(--muted);
+    border-radius:7px;padding:6px 10px;font:inherit;font-size:12px;font-weight:500;white-space:nowrap;text-align:left}
+  .btn:hover{color:var(--ink);border-color:var(--ink)}
+  .btn.ack:hover{color:var(--phosphor);border-color:var(--phosphor)}
+  .btn.dis:hover{color:var(--crit);border-color:var(--crit)}
+  .btn.primary{color:var(--ink);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
+  .btn.linklike{color:var(--accent)}
+  .status-tag{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);text-align:center}
+  .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+  .empty .big{font-size:18px;color:var(--ink);margin-bottom:6px}
+  .count{color:var(--muted);font-size:12px;margin:0 0 10px}
+  .pager{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:16px;color:var(--muted);font-size:12px}
+
+  /* ---- panels / forms / tables (watchlist, keys, settings, runs) ---- */
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+  .panel h2{font-size:15px;margin:0 0 14px;font-weight:600}
+  .field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+  .field label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .field input,.field select{background:var(--panel-2);border:1px solid var(--border);color:var(--ink);
+    border-radius:8px;padding:8px 10px;font:inherit;font-size:13px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+  .tbl{width:100%;border-collapse:collapse;font-size:13px}
+  .tbl th{text-align:left;color:var(--muted);font-weight:500;font-size:11px;text-transform:uppercase;
+    letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid var(--border)}
+  .tbl td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+  .tbl tr:last-child td{border-bottom:0}
+  .rowact{display:flex;gap:6px;flex-wrap:wrap}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--faint)}
+  .dot.ok{background:var(--phosphor)} .dot.no{background:var(--crit)}
+  .keyinput{background:var(--panel-2);border:1px solid var(--border);color:var(--ink);
+    border-radius:7px;padding:6px 8px;font:inherit;font-size:12px;min-width:150px}
+  .msg{font-size:12px;margin-left:8px;color:var(--muted)}
+  .msg.ok{color:var(--phosphor)} .msg.no{color:var(--crit)}
+  .runline{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0;font-size:13px}
+  .cstat{font-family:"IBM Plex Mono";font-size:11px;padding:1px 7px;border-radius:5px;border:1px solid var(--border)}
+  .cstat.ok{color:var(--phosphor);border-color:color-mix(in srgb,var(--phosphor) 40%,var(--border))}
+  .cstat.skip{color:var(--muted)}
+  .cstat.fail{color:var(--crit);border-color:color-mix(in srgb,var(--crit) 40%,var(--border))}
+  .hint{color:var(--faint);font-size:12px;margin:0 0 12px}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--panel-2);
+    border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:13px;color:var(--ink);
+    box-shadow:0 6px 24px #0008;display:none;z-index:50}
+  .toast.no{border-color:var(--crit);color:var(--crit)}
+  /* ---- update banner + onboarding wizard ---- */
+  .updbar{display:none;background:color-mix(in srgb,var(--accent) 14%,transparent);
+    border:1px solid var(--accent);border-radius:8px;padding:9px 14px;margin-bottom:14px;font-size:13px}
+  .updbar.show{display:block}
+  .wizard{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+  .wizard.show{display:flex}
+  .wizard-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    width:min(660px,94vw);max-height:88vh;overflow:auto;padding:24px}
+  .wizard h2{margin:0 0 4px;font-size:20px} .wizard .sub{color:var(--faint);font-size:13px;margin-bottom:16px}
+  .wsteps{display:flex;gap:6px;margin-bottom:18px}
+  .wsteps .s{flex:1;height:4px;border-radius:2px;background:var(--border)} .wsteps .s.on{background:var(--accent)}
+  .wizard-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+  .krow{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+  .krow .kn{font-family:"IBM Plex Mono";font-size:12px;min-width:150px}
+
+  @media(max-width:640px){
+    .card{grid-template-columns:6px 54px 1fr}
+    .actions{grid-column:1/-1;flex-direction:row;border-left:0;border-top:1px solid var(--border);flex-wrap:wrap}
+    .grid2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="updbar" id="updbar"></div>
+  <header>
+    <div>
+      <div class="brand">securitysight</div>
+      <h1>Triage</h1>
+      <div class="pitch">A self-updating, prioritized feed of what to actually
+        worry about today — correlated across exposure, ransomware, breach and KEV intel.</div>
+    </div>
+    <div class="asof">
+      <div id="asof"></div>
+      <div class="mono" id="total"></div>
+    </div>
+  </header>
+
+  <nav class="nav" id="nav">
+    <button data-view="triage" class="active">Triage</button>
+    <button data-view="watchlist">Watchlist</button>
+    <button data-view="keys">API keys</button>
+    <button data-view="settings">Settings</button>
+    <button data-view="runs">Runs</button>
+  </nav>
+
+  <!-- ============================= TRIAGE ============================= -->
+  <section class="view active" id="view-triage">
+    <div class="stats" id="stats"></div>
+    <div class="toolbar">
+      <input type="search" id="q" placeholder="Search company, host, CVE, title…">
+      <div class="sevpills" id="sevpills">
+        <span class="pill crit" data-sev="critical" data-on="1">critical</span>
+        <span class="pill high" data-sev="high" data-on="1">high</span>
+        <span class="pill med"  data-sev="medium" data-on="1">medium</span>
+        <span class="pill low"  data-sev="low" data-on="0">low</span>
+        <span class="pill info" data-sev="info" data-on="0">info</span>
+      </div>
+      <select id="company"><option value="">All companies</option></select>
+      <select id="source"><option value="">All sources</option></select>
+      <select id="status">
+        <option value="open">Open</option>
+        <option value="acknowledged">Acknowledged</option>
+        <option value="dismissed">Dismissed</option>
+        <option value="all">All</option>
+      </select>
+      <select id="sort">
+        <option value="score">Sort: score</option>
+        <option value="last_seen">Sort: newest</option>
+        <option value="company">Sort: company</option>
+      </select>
+    </div>
+    <p class="count" id="count"></p>
+    <div class="queue" id="queue"></div>
+    <div class="pager" id="pager"></div>
+  </section>
+
+  <!-- ============================ WATCHLIST =========================== -->
+  <section class="view" id="view-watchlist">
+    <div class="panel">
+      <h2 id="wl-form-title">Add a company</h2>
+      <div class="grid2">
+        <div class="field"><label>Name</label><input id="wl-name" placeholder="Acme Corp"></div>
+        <div class="field"><label>Criticality (1.0 = normal)</label><input id="wl-crit" type="number" step="0.1" value="1.0"></div>
+        <div class="field"><label>Domains (comma-separated)</label><input id="wl-domains" placeholder="acme.example, acme.io"></div>
+        <div class="field"><label>Tags / tech (comma-separated)</label><input id="wl-tags" placeholder="fortinet, exchange"></div>
+        <div class="field"><label>Aliases (comma-separated)</label><input id="wl-aliases" placeholder="Acme, Acme Inc"></div>
+        <div class="field"><label>CIDRs (comma-separated)</label><input id="wl-cidrs" placeholder="203.0.113.0/24"></div>
+      </div>
+      <div class="rowact">
+        <button class="btn primary" id="wl-save">Save company</button>
+        <button class="btn" id="wl-cancel" style="display:none">Cancel edit</button>
+        <span class="msg" id="wl-msg"></span>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Watchlist</h2>
+      <table class="tbl"><thead><tr><th>Name</th><th>Domains</th><th>Tags</th><th>Crit.</th><th></th></tr></thead>
+        <tbody id="wl-rows"></tbody></table>
+    </div>
+  </section>
+
+  <!-- ============================== KEYS ============================== -->
+  <section class="view" id="view-keys">
+    <div class="panel">
+      <h2>API keys</h2>
+      <p class="hint">Keys are stored in your OS keychain — never written to disk in plaintext,
+        never shown back here. Collectors without a key are skipped at run time.</p>
+      <table class="tbl"><thead><tr><th>Key</th><th>Status</th><th>Set / validate</th></tr></thead>
+        <tbody id="keys-rows"></tbody></table>
+    </div>
+  </section>
+
+  <!-- ============================ SETTINGS ============================ -->
+  <section class="view" id="view-settings">
+    <div class="panel">
+      <h2>Settings</h2>
+      <div class="field" style="max-width:320px">
+        <label>Alert minimum severity</label>
+        <select id="set-sev">
+          <option value="info">info</option><option value="low">low</option>
+          <option value="medium">medium</option><option value="high">high</option>
+          <option value="critical">critical</option>
+        </select>
+      </div>
+      <div class="field" style="max-width:420px">
+        <label>Dashboard URL (used in Slack links)</label>
+        <input id="set-url" placeholder="http://localhost:8000">
+      </div>
+      <div class="rowact"><button class="btn primary" id="set-save">Save settings</button>
+        <span class="msg" id="set-msg"></span></div>
+    </div>
+  </section>
+
+  <!-- ============================== RUNS ============================== -->
+  <section class="view" id="view-runs">
+    <div class="panel">
+      <h2>Run a collection</h2>
+      <p class="hint">Runs all collectors that have a key configured (keyless ones always run).
+        One run at a time.</p>
+      <div class="rowact" style="align-items:center">
+        <input class="keyinput" id="run-filter" placeholder="only collectors matching… (optional)">
+        <label style="font-size:12px;color:var(--muted)"><input type="checkbox" id="run-noalert" checked> no Slack alert</label>
+        <button class="btn primary" id="run-now">Run now</button>
+        <span class="msg" id="run-msg"></span>
+      </div>
+      <div id="run-status" style="margin-top:14px"></div>
+    </div>
+    <div class="panel">
+      <h2>Recent runs</h2>
+      <table class="tbl"><thead><tr><th>#</th><th>Started</th><th>Status</th><th>New</th><th>Total</th></tr></thead>
+        <tbody id="run-rows"></tbody></table>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<div class="wizard" id="wizard"><div class="wizard-card">
+  <div class="wsteps" id="wsteps"></div>
+  <div id="wiz-body"></div>
+  <div class="wizard-foot">
+    <button class="btn" id="wiz-back">Back</button>
+    <button class="btn" id="wiz-skip">Skip setup</button>
+    <button class="btn primary" id="wiz-next">Next</button>
+  </div>
+</div></div>
+
+<script>
+{% raw %}
+const H = {'Content-Type':'application/json'};
+async function api(url, opts){
+  const r = await fetch(url, opts);
+  let body = null; try { body = await r.json(); } catch(e){}
+  if(!r.ok){ const err = new Error((body&&body.error)||('HTTP '+r.status)); err.status=r.status; err.body=body; throw err; }
+  return body;
+}
+const post = (u,d)=>api(u,{method:'POST',headers:H,body:JSON.stringify(d||{})});
+const put  = (u,d)=>api(u,{method:'PUT', headers:H,body:JSON.stringify(d||{})});
+const del  = (u)=>api(u,{method:'DELETE'});
+const $ = id => document.getElementById(id);
+const esc = s => (s??'').toString().replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+let toastT;
+function toast(msg, bad){
+  const t=$('toast'); t.textContent=msg; t.className='toast'+(bad?' no':''); t.style.display='block';
+  clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none', 3200);
+}
+
+/* ----------------------------- nav ----------------------------- */
+document.getElementById('nav').addEventListener('click', e=>{
+  const b=e.target.closest('button[data-view]'); if(!b) return;
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active', x===b));
+  const v=b.dataset.view;
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active', s.id==='view-'+v));
+  if(v==='triage'){ loadFacets(); loadFindings(); }
+  if(v==='watchlist') loadCompanies();
+  if(v==='keys') loadKeys();
+  if(v==='settings') loadSettings();
+  if(v==='runs'){ loadRuns(); pollStatus(); }
+});
+
+/* --------------------------- triage --------------------------- */
+const BOOST=['KEV','ransomware','exposed','multiple scanners','remote-access'];
+const state={q:'',sevs:new Set(['critical','high','medium']),company:'',source:'',
+  status:'open',sort:'score',page:1,page_size:50};
+
+function relAge(iso){
+  if(!iso) return '';
+  const d=(Date.now()-new Date(iso))/86400000;
+  if(d<1) return 'new today'; if(d<2) return 'yesterday';
+  if(d<7) return Math.floor(d)+'d ago'; return new Date(iso).toLocaleDateString();
+}
+function card(f){
+  const tr=f.triage||'new';
+  const reasons=(f.score_reasons||[]).map(r=>{
+    const boost=BOOST.some(w=>r.toLowerCase().includes(w.toLowerCase()));
+    return `<span class="chip ${boost?'boost':''}">${esc(r)}</span>`;}).join('');
+  const age=relAge(f.first_seen);
+  const ev=f.evidence_url?`<button class="btn linklike" onclick="window.open('${f.evidence_url}','_blank')">Evidence ↗</button>`:'';
+  const open=(tr==='new'||tr==='open');
+  const d=f.detail||{}, loc=d.location||{};
+  let wp=[]; if(loc.ip) wp.push(loc.ip+(loc.port?':'+loc.port:'')); if(loc.fqdns) loc.fqdns.forEach(h=>wp.push(h));
+  const whereLine = wp.length?`<div class="where"><span class="wlabel">where</span>${wp.map(p=>`<code>${esc(p)}</code>`).join('')}</div>`:'';
+  let assets='';
+  if(Array.isArray(d.affected_assets)){
+    if(d.affected_assets.length){
+      const chips=d.affected_assets.map(a=>{
+        const label=[a.fqdn,(a.ip?a.ip+(a.port?':'+a.port:''):'')].filter(Boolean).join(' · ');
+        return `<span class="asset ${a.exposed?'exposed':''}"><code>${esc(label||'?')}</code> <em>${esc(a.source)}</em></span>`;
+      }).join('');
+      assets=`<div class="assets"><span class="wlabel">affected assets</span>${chips}</div>`;
+    } else {
+      const prod=d.product||(d.matched_tags||[]).join(', ')||'this product';
+      assets=`<div class="assets none">No host located from public data — matched on product/tag. Check internal inventory for <code>${esc(prod)}</code>.</div>`;
+    }
+  }
+  const actions = open
+    ? `<button class="btn ack" onclick="triage('${f.fingerprint}','acknowledged')">Acknowledge</button>
+       <button class="btn dis" onclick="triage('${f.fingerprint}','dismissed')">Dismiss</button>`
+    : `<div class="status-tag">${tr}</div><button class="btn" onclick="triage('${f.fingerprint}','new')">Reopen</button>`;
+  return `<div class="card ${f.severity}" data-status="${open?'open':tr}">
+    <div class="spine"></div>
+    <div class="score"><b>${(f.score||0)}</b><span>${esc(f.severity)}</span></div>
+    <div class="body">
+      <div class="line1"><span class="co">${esc(f.company)}</span>
+        <span class="src">${esc(f.source)}</span>
+        <span class="age ${age==='new today'?'new':''}">${age}</span></div>
+      <div class="title">${esc(f.title)}</div>
+      ${whereLine}${assets}
+      <div class="why">${reasons}</div>
+      <div class="detail"><pre>${esc(JSON.stringify(f.detail,null,2))}</pre></div>
+      <button class="btn linklike" style="margin-top:8px"
+        onclick="const x=this.parentElement.querySelector('.detail');x.style.display=x.style.display==='block'?'none':'block'">Details</button>
+      ${ev}
+    </div>
+    <div class="actions">${actions}</div></div>`;
+}
+function qstr(){
+  const p=new URLSearchParams();
+  if(state.q) p.set('q',state.q);
+  const s=[...state.sevs]; if(s.length && s.length<5) p.set('severity',s.join(','));
+  if(state.company) p.set('company',state.company);
+  if(state.source) p.set('source',state.source);
+  p.set('status',state.status); p.set('sort',state.sort);
+  p.set('page',state.page); p.set('page_size',state.page_size);
+  return p.toString();
+}
+async function loadFindings(){
+  let data; try{ data=await api('/api/findings?'+qstr()); }catch(e){ toast(e.message,true); return; }
+  const q=$('queue');
+  $('count').textContent=`${data.total} finding${data.total===1?'':'s'} match`;
+  if(!data.items.length){
+    q.innerHTML=`<div class="empty"><div class="big">Queue clear</div>Nothing matches the current filters.</div>`;
+    $('pager').innerHTML=''; return;
+  }
+  q.innerHTML=data.items.map(card).join('');
+  const pages=Math.max(1,Math.ceil(data.total/data.page_size));
+  $('pager').innerHTML = pages>1
+    ? `<button class="btn" ${data.page<=1?'disabled':''} onclick="gotoPage(${data.page-1})">← Prev</button>
+       <span>page ${data.page} of ${pages}</span>
+       <button class="btn" ${data.page>=pages?'disabled':''} onclick="gotoPage(${data.page+1})">Next →</button>` : '';
+}
+function gotoPage(p){ state.page=p; loadFindings(); window.scrollTo({top:0,behavior:'smooth'}); }
+async function loadFacets(){
+  let f; try{ f=await api('/api/facets'); }catch(e){ return; }
+  const st=f.stats||{};
+  $('stats').innerHTML=`
+    <div class="tile crit"><div class="n">${st.critical_open||0}</div><div class="l">Critical · open</div></div>
+    <div class="tile high"><div class="n">${st.high_open||0}</div><div class="l">High · open</div></div>
+    <div class="tile med"><div class="n">${st.medium_open||0}</div><div class="l">Medium · open</div></div>
+    <div class="tile done"><div class="n">${st.triaged||0}</div><div class="l">Triaged</div></div>`;
+  $('total').textContent=(st.total||0)+' findings in lake';
+  $('asof').textContent='as of '+new Date().toLocaleString();
+  const co=$('company'), so=$('source');
+  co.innerHTML='<option value="">All companies</option>'+(f.companies||[]).map(c=>`<option ${c===state.company?'selected':''}>${esc(c)}</option>`).join('');
+  so.innerHTML='<option value="">All sources</option>'+(f.sources||[]).map(s=>`<option ${s===state.source?'selected':''}>${esc(s)}</option>`).join('');
+}
+async function triage(fp,status){
+  try{ await post('/api/triage',{fingerprint:fp,status}); }catch(e){ toast(e.message,true); return; }
+  loadFindings(); loadFacets();
+}
+$('q').addEventListener('input',e=>{state.q=e.target.value;state.page=1;loadFindings();});
+$('company').addEventListener('change',e=>{state.company=e.target.value;state.page=1;loadFindings();});
+$('source').addEventListener('change',e=>{state.source=e.target.value;state.page=1;loadFindings();});
+$('status').addEventListener('change',e=>{state.status=e.target.value;state.page=1;loadFindings();});
+$('sort').addEventListener('change',e=>{state.sort=e.target.value;state.page=1;loadFindings();});
+$('sevpills').addEventListener('click',e=>{
+  const p=e.target.closest('.pill'); if(!p) return;
+  const on=p.dataset.on==='1'?'0':'1'; p.dataset.on=on;
+  on==='1'?state.sevs.add(p.dataset.sev):state.sevs.delete(p.dataset.sev);
+  state.page=1; loadFindings();
+});
+
+/* -------------------------- watchlist -------------------------- */
+let editId=null;
+const csv = v => (v||'').split(',').map(x=>x.trim()).filter(Boolean);
+async function loadCompanies(){
+  let list; try{ list=await api('/api/companies'); }catch(e){ toast(e.message,true); return; }
+  $('wl-rows').innerHTML = list.length ? list.map(c=>`<tr>
+    <td>${esc(c.name)}</td><td class="mono">${esc((c.domains||[]).join(', '))}</td>
+    <td>${esc((c.tags||[]).join(', '))}</td><td>${c.criticality}</td>
+    <td class="rowact">
+      <button class="btn" onclick='wlEdit(${JSON.stringify(c)})'>Edit</button>
+      <button class="btn dis" onclick="wlDelete(${c.id})">Delete</button></td></tr>`).join('')
+    : `<tr><td colspan="5" style="color:var(--muted)">No companies yet — add one above.</td></tr>`;
+}
+function wlForm(){ return {name:$('wl-name').value,criticality:$('wl-crit').value,
+  domains:csv($('wl-domains').value),tags:csv($('wl-tags').value),
+  aliases:csv($('wl-aliases').value),cidrs:csv($('wl-cidrs').value)}; }
+function wlReset(){ editId=null; ['name','domains','tags','aliases','cidrs'].forEach(k=>$('wl-'+k).value='');
+  $('wl-crit').value='1.0'; $('wl-form-title').textContent='Add a company';
+  $('wl-cancel').style.display='none'; $('wl-msg').textContent=''; }
+function wlEdit(c){ editId=c.id; $('wl-name').value=c.name; $('wl-crit').value=c.criticality;
+  $('wl-domains').value=(c.domains||[]).join(', '); $('wl-tags').value=(c.tags||[]).join(', ');
+  $('wl-aliases').value=(c.aliases||[]).join(', '); $('wl-cidrs').value=(c.cidrs||[]).join(', ');
+  $('wl-form-title').textContent='Edit '+c.name; $('wl-cancel').style.display='';
+  window.scrollTo({top:0,behavior:'smooth'}); }
+async function wlSave(){
+  const data=wlForm();
+  try{
+    if(editId){ await put('/api/companies/'+editId,data); } else { await post('/api/companies',data); }
+    wlReset(); loadCompanies(); toast('Saved');
+  }catch(e){ $('wl-msg').textContent=e.message; $('wl-msg').className='msg no'; }
+}
+async function wlDelete(id){ if(!confirm('Remove this company?')) return;
+  try{ await del('/api/companies/'+id); loadCompanies(); }catch(e){ toast(e.message,true); } }
+$('wl-save').addEventListener('click',wlSave);
+$('wl-cancel').addEventListener('click',wlReset);
+
+/* ----------------------------- keys ---------------------------- */
+async function loadKeys(){
+  let keys; try{ keys=await api('/api/keys'); }catch(e){ toast(e.message,true); return; }
+  $('keys-rows').innerHTML = keys.map(k=>{
+    const dot = k.set ? (k.ok===false?'no':'ok') : '';
+    const valnote = k.validated_at ? `<span class="msg ${k.ok?'ok':'no'}">${k.ok?'valid':'invalid'}</span>` : '';
+    return `<tr>
+      <td class="mono">${esc(k.name)}</td>
+      <td><span class="dot ${dot}"></span>${k.set?'set':'not set'} ${valnote}</td>
+      <td class="rowact">
+        <input class="keyinput" type="password" id="kv-${k.name}" placeholder="${k.set?'replace…':'paste key…'}">
+        <button class="btn" onclick="keySave('${k.name}')">Save</button>
+        <button class="btn" onclick="keyValidate('${k.name}')">Validate</button>
+        ${k.set?`<button class="btn dis" onclick="keyDelete('${k.name}')">Delete</button>`:''}
+        <span class="msg" id="km-${k.name}"></span>
+      </td></tr>`;
+  }).join('');
+}
+async function keySave(name){
+  const v=$('kv-'+name).value; if(!v){ return; }
+  try{ await put('/api/keys/'+name,{value:v}); $('kv-'+name).value=''; loadKeys(); toast(name+' saved'); }
+  catch(e){ toast(e.message,true); }
+}
+async function keyValidate(name){
+  const v=$('kv-'+name).value; const m=$('km-'+name); m.textContent='checking…'; m.className='msg';
+  try{ const r=await post('/api/keys/'+name+'/validate', v?{value:v}:{});
+    m.textContent=r.detail||(r.ok?'valid':'invalid'); m.className='msg '+(r.ok?'ok':'no'); }
+  catch(e){ m.textContent=e.message; m.className='msg no'; }
+}
+async function keyDelete(name){ if(!confirm('Remove '+name+'?')) return;
+  try{ await del('/api/keys/'+name); loadKeys(); }catch(e){ toast(e.message,true); } }
+
+/* --------------------------- settings -------------------------- */
+async function loadSettings(){
+  let s; try{ s=await api('/api/settings'); }catch(e){ toast(e.message,true); return; }
+  $('set-sev').value=s.alert_min_severity||'high';
+  $('set-url').value=s.dashboard_url||'';
+}
+$('set-save').addEventListener('click',async()=>{
+  try{ await put('/api/settings',{alert_min_severity:$('set-sev').value,dashboard_url:$('set-url').value});
+    $('set-msg').textContent='saved'; $('set-msg').className='msg ok'; }
+  catch(e){ $('set-msg').textContent=e.message; $('set-msg').className='msg no'; }
+});
+
+/* ----------------------------- runs ---------------------------- */
+let pollT;
+function renderStatus(s){
+  const el=$('run-status');
+  if(!s || s.state==='idle'){ el.innerHTML='<span class="hint">No run yet this session.</span>'; return; }
+  const cols=(s.collectors||[]).map(c=>`<span class="cstat ${c.status}">${esc(c.name)}${c.status==='ok'?' '+c.count:''}</span>`).join(' ');
+  let head;
+  if(s.state==='running') head=`<b style="color:var(--accent)">running…</b> ${s.phase?('· '+esc(s.phase)):''}`;
+  else if(s.state==='failed') head=`<b style="color:var(--crit)">failed</b> ${esc(s.error||'')}`;
+  else { const sm=s.summary||{}; head=`<b style="color:var(--phosphor)">done</b> · ${sm.new||0} new · ${sm.total_in_lake||0} in lake`; }
+  el.innerHTML=`<div class="runline">${head}</div><div class="runline">${cols||'<span class="hint">no collectors ran</span>'}</div>`;
+}
+async function pollStatus(){
+  clearTimeout(pollT);
+  let s; try{ s=await api('/api/run/status'); }catch(e){ return; }
+  renderStatus(s);
+  if(s && s.state==='running'){ pollT=setTimeout(pollStatus,1500); }
+  else { loadRuns(); }
+}
+async function loadRuns(){
+  let runs; try{ runs=await api('/api/runs?limit=20'); }catch(e){ return; }
+  $('run-rows').innerHTML = runs.length ? runs.map(r=>`<tr>
+    <td>${r.id}</td><td>${r.started_at?new Date(r.started_at).toLocaleString():''}</td>
+    <td>${esc(r.status)}</td><td>${(r.summary&&r.summary.new)||0}</td>
+    <td>${(r.summary&&r.summary.total_in_lake)||0}</td></tr>`).join('')
+    : `<tr><td colspan="5" style="color:var(--muted)">No runs yet.</td></tr>`;
+}
+$('run-now').addEventListener('click',async()=>{
+  const body={no_alert:$('run-noalert').checked}; const f=$('run-filter').value.trim(); if(f) body.collectors=f;
+  try{ await post('/api/run',body); $('run-msg').textContent=''; pollStatus(); }
+  catch(e){ if(e.status===409){ toast('A run is already in progress',true); } else { toast(e.message,true); } }
+});
+
+/* ------------------------- onboarding ------------------------- */
+const WSTEPS=['welcome','keys','watchlist']; let wstep=0;
+async function checkOnboarding(){
+  let s; try{ s=await api('/api/onboarding/state'); }catch(e){ return; }
+  if(s.needed){ wstep=0; $('wizard').classList.add('show'); renderWizard(); }
+}
+function renderSteps(){ $('wsteps').innerHTML=WSTEPS.map((_,i)=>`<div class="s ${i<=wstep?'on':''}"></div>`).join(''); }
+async function renderWizard(){
+  renderSteps();
+  $('wiz-back').style.visibility = wstep===0?'hidden':'visible';
+  $('wiz-next').textContent = wstep===WSTEPS.length-1?'Finish':'Next';
+  const b=$('wiz-body');
+  if(WSTEPS[wstep]==='welcome'){
+    b.innerHTML=`<h2>Welcome to securitysight</h2>
+      <div class="sub">A passive monitor for your external attack surface. Three quick steps — all skippable.</div>
+      <p>Want to explore with sample data first?</p>
+      <button class="btn primary" id="wiz-seed">Load demo data</button> <span class="msg" id="wiz-seed-msg"></span>`;
+    $('wiz-seed').onclick=async()=>{ const m=$('wiz-seed-msg'); m.textContent='loading…'; m.className='msg';
+      try{ const r=await post('/api/seed-demo'); m.textContent=`loaded ${r.total} findings`; m.className='msg ok'; }
+      catch(e){ m.textContent=e.message; m.className='msg no'; } };
+  } else if(WSTEPS[wstep]==='keys'){
+    b.innerHTML=`<h2>Add API keys</h2>
+      <div class="sub">Stored in your OS keychain. Keyless sources (crt.sh, CISA KEV, RansomLook) work with none — add what you have, skip the rest.</div>
+      <div id="wiz-keys">loading…</div>`;
+    let keys=[]; try{ keys=await api('/api/keys'); }catch(e){}
+    $('wiz-keys').innerHTML=keys.map(k=>`<div class="krow"><span class="kn">${esc(k.name)}</span>
+      <input class="keyinput" type="password" id="wk-${k.name}" placeholder="${k.set?'set ✓ — replace':'paste key'}">
+      <button class="btn" onclick="wizKeySave('${k.name}')">Save</button>
+      <button class="btn" onclick="wizKeyValidate('${k.name}')">Validate</button>
+      <span class="msg" id="wkm-${k.name}"></span></div>`).join('');
+  } else {
+    b.innerHTML=`<h2>Add your first company</h2>
+      <div class="sub">The watchlist. Add more later under Watchlist.</div>
+      <div class="field"><label>Name</label><input id="wc-name" placeholder="Acme Corp"></div>
+      <div class="field"><label>Domains (comma-separated)</label><input id="wc-domains" placeholder="acme.com"></div>
+      <div class="field"><label>Tags / tech (comma-separated)</label><input id="wc-tags" placeholder="fortinet, exchange"></div>
+      <button class="btn" id="wc-add">Add company</button> <span class="msg" id="wc-msg"></span>`;
+    $('wc-add').onclick=async()=>{ const name=$('wc-name').value.trim(); if(!name) return;
+      try{ await post('/api/companies',{name,domains:csv($('wc-domains').value),tags:csv($('wc-tags').value)});
+        const m=$('wc-msg'); m.textContent='added'; m.className='msg ok';
+        ['wc-name','wc-domains','wc-tags'].forEach(i=>$(i).value=''); }
+      catch(e){ const m=$('wc-msg'); m.textContent=e.message; m.className='msg no'; } };
+  }
+}
+async function wizKeySave(name){ const v=$('wk-'+name).value; if(!v) return; const m=$('wkm-'+name);
+  try{ await put('/api/keys/'+name,{value:v}); $('wk-'+name).value=''; m.textContent='saved'; m.className='msg ok'; }
+  catch(e){ m.textContent=e.message; m.className='msg no'; } }
+async function wizKeyValidate(name){ const v=$('wk-'+name).value; const m=$('wkm-'+name); m.textContent='checking…'; m.className='msg';
+  try{ const r=await post('/api/keys/'+name+'/validate', v?{value:v}:{}); m.textContent=r.detail||(r.ok?'valid':'invalid'); m.className='msg '+(r.ok?'ok':'no'); }
+  catch(e){ m.textContent=e.message; m.className='msg no'; } }
+async function finishWizard(){ try{ await post('/api/onboarding/complete'); }catch(e){}
+  $('wizard').classList.remove('show'); loadFacets(); loadFindings(); }
+$('wiz-next').onclick=()=>{ if(wstep<WSTEPS.length-1){ wstep++; renderWizard(); } else { finishWizard(); } };
+$('wiz-back').onclick=()=>{ if(wstep>0){ wstep--; renderWizard(); } };
+$('wiz-skip').onclick=finishWizard;
+
+/* ------------------------- update check ----------------------- */
+async function checkUpdate(){
+  let v; try{ v=await api('/api/version?check=1'); }catch(e){ return; }
+  if(v.latest && v.latest!==v.current){
+    const b=$('updbar');
+    b.innerHTML=`A new version (<b>${esc(v.latest)}</b>) is available — you have ${esc(v.current)}. <a href="${v.update_url}" target="_blank">Download ↗</a>`;
+    b.classList.add('show');
+  }
+}
+
+/* --------------------------- bootstrap ------------------------- */
+loadFacets(); loadFindings(); checkOnboarding(); checkUpdate();
+{% endraw %}
+</script>
+</body>
+</html>

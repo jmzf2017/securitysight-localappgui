@@ -1,0 +1,28 @@
+[Unit]
+Description=Portfolio risk monitor - triage dashboard
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=pcrm
+Group=pcrm
+WorkingDirectory=/opt/portco-risk-monitor
+EnvironmentFile=/opt/portco-risk-monitor/.env
+# Bind to localhost by default; front with nginx/Caddy + auth for remote access.
+Environment=PCRM_HOST=127.0.0.1
+Environment=PCRM_PORT=8000
+
+ExecStart=/usr/bin/env uv run dashboard.py
+# Production option (add gunicorn to requirements): serve the WSGI app directly:
+# ExecStart=/opt/portco-risk-monitor/.venv/bin/gunicorn -b 127.0.0.1:8000 dashboard:app
+
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/portco-risk-monitor/data
+
+[Install]
+WantedBy=multi-user.target

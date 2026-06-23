@@ -1,0 +1,14 @@
+[Unit]
+Description=Run the portfolio risk monitor daily
+
+[Timer]
+# 07:00 local time every day. Adjust to taste.
+OnCalendar=*-*-* 07:00:00
+# spread load / avoid hammering APIs on the dot
+RandomizedDelaySec=900
+# if the box was off at 07:00, run as soon as it's back
+Persistent=true
+Unit=portco-risk-monitor.service
+
+[Install]
+WantedBy=timers.target

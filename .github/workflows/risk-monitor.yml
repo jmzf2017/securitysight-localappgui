@@ -1,0 +1,145 @@
+# Reusable engine for the schedulers. Both daily.yml and weekly.yml call this
+# with a different `cadence`, and they share ONE lake (the `lake_branch`) so
+# cross-source correlation works: a weekly credential leak can still see the
+# exposed service a daily run found.
+#
+# Persistence: the append-only lake lives on a dedicated branch (default
+# `risk-lake`), committed after every run. That keeps `main` clean while giving
+# the lake a real git audit trail. USE A PRIVATE REPO — the lake contains
+# findings about your companies (exposed services, breach references).
+
+name: risk-monitor (engine)
+
+on:
+  workflow_call:
+    inputs:
+      cadence:
+        description: "daily | weekly"
+        type: string
+        required: true
+      lake_branch:
+        description: "branch the data lake is committed to"
+        type: string
+        default: risk-lake
+      dry_run:
+        description: "print the Slack payload instead of posting"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write          # to push the lake branch
+
+concurrency:
+  # daily and weekly share the lake branch; never let two runs push at once
+  group: risk-monitor-lake
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create lake branch if missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          BR="${{ inputs.lake_branch }}"
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git ls-remote --exit-code --heads origin "$BR" >/dev/null 2>&1; then
+            echo "Bootstrapping orphan lake branch: $BR"
+            git worktree add --detach _bootstrap
+            ( cd _bootstrap
+              git checkout --orphan "$BR"
+              git rm -rf . >/dev/null 2>&1 || true
+              mkdir -p data
+              printf "data lake for portco-risk-monitor\n" > README.md
+              git add -A
+              git commit -m "init lake branch" --allow-empty
+              git push origin "$BR" )
+            git worktree remove _bootstrap --force
+          fi
+
+      - name: Restore lake
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.lake_branch }}
+          path: lake
+
+      - name: Seed working lake from branch
+        run: |
+          set -euo pipefail
+          if [ -d lake/data ]; then
+            cp -r lake/data ./data
+            echo "Restored $(find data -type f | wc -l) lake files"
+          else
+            echo "No prior lake; starting fresh (everything will be 'new today')"
+          fi
+
+      - name: Run collectors (${{ inputs.cadence }})
+        env:
+          SHODAN_API_KEY:     ${{ secrets.SHODAN_API_KEY }}
+          CENSYS_PAT:         ${{ secrets.CENSYS_PAT }}
+          MALLORY_API_KEY:    ${{ secrets.MALLORY_API_KEY }}
+          HIBP_API_KEY:       ${{ secrets.HIBP_API_KEY }}
+          VT_API_KEY:         ${{ secrets.VT_API_KEY }}
+          LEAKLOOKUP_API_KEY: ${{ secrets.LEAKLOOKUP_API_KEY }}
+          SLACK_WEBHOOK_URL:  ${{ secrets.SLACK_WEBHOOK_URL }}
+          HIBP_REQUEST_DELAY: "1.6"
+          VT_REQUEST_DELAY:   "15"
+        run: |
+          set -euo pipefail
+          ARGS="--cadence ${{ inputs.cadence }}"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          python collectors.py $ARGS
+
+      - name: Write run summary
+        if: always()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          p = pathlib.Path("data/state.json")
+          if not p.exists():
+              print("No lake state produced."); raise SystemExit
+          s = json.load(open(p))
+          openf = [f for f in s.values()
+                   if (f.get("triage") in (None, "new", "open"))
+                   and f.get("kind") != "collector_error"]
+          openf.sort(key=lambda f: f.get("score", 0), reverse=True)
+          print(f"### Triage — top open findings ({len(openf)} open)\n")
+          print("| score | sev | company | source | finding |")
+          print("|--:|:--|:--|:--|:--|")
+          for f in openf[:10]:
+              t = f["title"].replace("|", "\\|")
+              print(f"| {f.get('score',0)} | {f.get('severity','')} | "
+                    f"{f['company']} | {f['source']} | {t} |")
+          PY
+
+      - name: Persist lake to branch
+        if: always()
+        run: |
+          set -euo pipefail
+          rm -rf lake/data
+          cp -r data lake/data
+          cd lake
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No lake changes to commit."
+          else
+            git commit -m "lake: ${{ inputs.cadence }} run $(date -u +%FT%TZ) [skip ci]"
+            git push origin "HEAD:${{ inputs.lake_branch }}"
+          fi

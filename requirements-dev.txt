@@ -1,0 +1,5 @@
+# Development / test dependencies.
+#   pip install -r requirements-dev.txt   (or: uv sync --extra dev)
+-r requirements.txt
+pytest>=7.4
+pyinstaller>=6            # desktop app packaging (see packaging/)

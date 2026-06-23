@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+#
+# runssp — one friendly entry point for securitysight.
+#
+#   ./runssp              run a collection (no alerts), then open the dashboard
+#   ./runssp run [args]   run a collection only         (passes args to collectors.py)
+#   ./runssp dashboard    open the triage dashboard only
+#   ./runssp reset [opts] clear the lake & start fresh  (--purge, --remote, --yes)
+#   ./runssp update [opts] push code to both GitHub repos (--dry-run, --yes, -m "msg")
+#   ./runssp test         run the test suite
+#   ./runssp setup        create the venv and install dependencies
+#
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")" && pwd -P)"
+cd "$ROOT"
+[ -f "$ROOT/.ssp.env" ] && . "$ROOT/.ssp.env"
+
+VENV="$ROOT/.venv"
+PY="$VENV/bin/python"
+PIP="$VENV/bin/pip"
+URL="http://localhost:8000"
+
+ensure_venv() {
+  if [ ! -x "$PY" ]; then
+    echo "First run: creating virtualenv and installing dependencies…"
+    python3 -m venv "$VENV"
+    "$PIP" install -q --upgrade pip
+    "$PIP" install -q -r requirements.txt
+  fi
+}
+load_env() { if [ -f "$ROOT/.env" ]; then set -a; . "$ROOT/.env"; set +a; fi; }
+open_browser() { command -v open >/dev/null 2>&1 && ( sleep 2; open "$URL" ) & }
+
+cmd_setup() {
+  ensure_venv
+  "$PIP" install -q -r requirements-dev.txt 2>/dev/null || true
+  echo "Setup complete. Next: copy .env.example to .env and add your keys."
+}
+
+cmd_run() {        # collection only; default --no-alert, extra args passed through
+  ensure_venv; load_env
+  "$PY" collectors.py --no-alert "$@"
+}
+
+cmd_dashboard() {
+  ensure_venv; load_env
+  echo "Dashboard → $URL  (Ctrl+C to stop)"
+  open_browser
+  exec "$PY" dashboard.py
+}
+
+cmd_test() {
+  ensure_venv
+  "$PIP" install -q -r requirements-dev.txt 2>/dev/null || true
+  "$PY" -m pytest -q
+}
+
+cmd_reset() {      # --purge / --yes -> collectors.py ; --remote -> delete cloud branch
+  ensure_venv
+  local purge="" yes="" remote=0
+  for a in "$@"; do
+    case "$a" in
+      --purge)  purge="--purge" ;;
+      --yes|-y) yes="--yes" ;;
+      --remote) remote=1 ;;
+      *) echo "reset: unknown option $a" >&2; exit 2 ;;
+    esac
+  done
+  "$PY" collectors.py --reset $purge $yes
+
+  # cloud: delete the risk-lake branch on the PRIVATE repo so Actions re-baselines
+  local do_it=0
+  if [ "$remote" = "1" ]; then
+    do_it=1
+  else
+    read -r -p "Also delete the cloud 'risk-lake' branch on securitysight-private? [y/N] " a || true
+    case "$a" in y|Y) do_it=1 ;; esac
+  fi
+  if [ "$do_it" = "1" ]; then
+    [ -n "${SSP_PRIVATE_DIR:-}" ] || { echo "SSP_PRIVATE_DIR not set (see .ssp.env) — skipping cloud reset." >&2; return 0; }
+    [ -d "$SSP_PRIVATE_DIR/.git" ] || { echo "$SSP_PRIVATE_DIR is not a git clone — skipping." >&2; return 0; }
+    echo "Deleting remote branch 'risk-lake' (git will prompt for credentials)…"
+    ( cd "$SSP_PRIVATE_DIR" && git push origin --delete risk-lake ) \
+      && echo "✓ cloud lake cleared." \
+      || echo "(branch may not exist remotely — nothing to delete.)"
+  fi
+}
+
+cmd_update() { exec "$ROOT/update_repos.sh" "$@"; }
+
+cmd_default() {    # bare ./runssp : collect quietly, then dashboard
+  ensure_venv; load_env
+  echo "Running a collection (no alerts)…"
+  "$PY" collectors.py --no-alert || true
+  echo
+  cmd_dashboard
+}
+
+sub="${1:-}"; [ $# -gt 0 ] && shift || true
+case "$sub" in
+  ""|default)  cmd_default "$@" ;;
+  run)         cmd_run "$@" ;;
+  dashboard|dash) cmd_dashboard "$@" ;;
+  reset)       cmd_reset "$@" ;;
+  update)      cmd_update "$@" ;;
+  test)        cmd_test "$@" ;;
+  setup)       cmd_setup "$@" ;;
+  -h|--help|help)
+    sed -n '3,11p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) echo "unknown command: $sub  (try: ./runssp --help)" >&2; exit 2 ;;
+esac
