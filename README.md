@@ -6,9 +6,7 @@
 
 A free, passive OSINT-derived external attack-surface monitor.
 
-[![tests](https://github.com/jmzf2017/securitysight/actions/workflows/tests.yml/badge.svg)](https://github.com/jmzf2017/securitysight/actions/workflows/tests.yml)
-[![Daily run](https://github.com/jmzf2017/securitysight/actions/workflows/daily.yml/badge.svg)](https://github.com/jmzf2017/securitysight/actions/workflows/daily.yml)
-[![Weekly run](https://github.com/jmzf2017/securitysight/actions/workflows/weekly.yml/badge.svg)](https://github.com/jmzf2017/securitysight/actions/workflows/weekly.yml)
+[![tests](https://github.com/jmzf2017/securitysight-localappgui/actions/workflows/tests.yml/badge.svg)](https://github.com/jmzf2017/securitysight-localappgui/actions/workflows/tests.yml)
 [![python](https://img.shields.io/badge/python-3.10%2B-3776ab)](https://www.python.org/)
 [![license](https://img.shields.io/badge/license-MIT-22c55e)](LICENSE)
 [![collectors](https://img.shields.io/badge/collectors-10%20live-7ee787)](#whats-collected)
